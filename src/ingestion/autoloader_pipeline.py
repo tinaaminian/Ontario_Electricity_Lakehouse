@@ -1,6 +1,6 @@
 from pyspark.sql import DataFrame, SparkSession
-from ingestion.config import  SourceConfig
-from ingestion.schema import IESO_DEMAND_BRONZE_SCHEMA
+from src.ingestion.config import  SourceConfig
+from src.ingestion.schema import IESO_DEMAND_BRONZE_SCHEMA
 from pathlib import Path
 
 def read_stream(spark, config: SourceConfig) -> DataFrame:
