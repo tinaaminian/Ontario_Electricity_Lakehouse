@@ -42,3 +42,19 @@ def prepare_bronze(df:DataFrame,
     )
     return bronze_df
 
+def prepare_bronze_stream(df: DataFrame) -> DataFrame:
+
+    bronze_df_stream = (
+        df.withColumnsRenamed({
+            "Date": "date_raw",
+            "Hour": "hour_raw",
+            "Market Demand": "market_demand_raw",
+            "Ontario Demand": "ontario_demand_raw"
+        })
+        .withColumn("source_file_path", F.col("_metadata.file_path"))
+        .withColumn("source_file_name", F.col("_metadata.file_name"))
+        .withColumn("ingested_at", F.current_timestamp())
+    )
+    return bronze_df_stream
+
+
