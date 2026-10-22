@@ -42,6 +42,25 @@ def prepare_bronze(df:DataFrame,
     )
     return bronze_df
 
+# creating streaming dataframe
+
+def read_stream(spark, config: SourceConfig) -> DataFrame:
+    """
+        Create an auto loader streaming Dataframe for source csv files.
+        Reads files incrementally from the source directory.
+    """
+    df = (
+      spark.readStream.format("cloudFiles")
+      .option("cloudFiles.format", config.file_format)
+      .option("header", "true")
+      .option("comment", "\\")
+      .option("cloudFiles.includeExistingFiles", "true")
+      .option("mode", "FAILFAST")
+      .schema(IESO_DEMAND_BRONZE_SCHEMA)
+      .load(str(Path(config.file_path).parent))
+    )
+    return df
+
 def prepare_bronze_stream(df: DataFrame) -> DataFrame:
 
     bronze_df_stream = (
