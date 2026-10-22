@@ -1,6 +1,6 @@
 from pyspark.sql import DataFrame, SparkSession
 from ingestion.config import  SourceConfig
-from ingestion.schema import IESO_DEMAND_2025
+from ingestion.schema import IESO_DEMAND_BRONZE_SCHEMA
 from pathlib import Path
 
 def read_stream(spark, config: SourceConfig) -> DataFrame:
@@ -15,7 +15,7 @@ def read_stream(spark, config: SourceConfig) -> DataFrame:
       .option("comment", "\\")
       .option("cloudFiles.includeExistingFiles", "true")
       .option("mode", "FAILFAST")
-      .schema(IESO_DEMAND_2025)
+      .schema(IESO_DEMAND_BRONZE_SCHEMA)
       .load(str(Path(config.file_path).parent))
     )
     return df
