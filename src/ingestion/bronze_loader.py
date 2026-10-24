@@ -12,6 +12,7 @@ def read_source(spark,config: SourceConfig) -> DataFrame:
         .schema(IESO_DEMAND_BRONZE_SCHEMA)
         .option("comment","\\")
         .option("header","true")
+        .option("enforceSchema", "false")
         .option("mode", "failfast")
         .load(config.file_path)
 
@@ -53,6 +54,7 @@ def read_stream(spark, config: SourceConfig) -> DataFrame:
       spark.readStream.format("cloudFiles")
       .option("cloudFiles.format", config.file_format)
       .option("header", "true")
+      .option("enforceSchema", "false")
       .option("comment", "\\")
       .option("cloudFiles.includeExistingFiles", "true")
       .option("mode", "FAILFAST")
