@@ -1,37 +1,59 @@
-from src.profile_ieso import CSV_FILE
-from src.ingestion.bronze_loader import (read_source,prepare_bronze)
-from pyspark.sql import SparkSession
-from src.ingestion.config import IESO_DEMAND_2025
-from dataclasses import replace
-from uuid import uuid4
+from pathlib import Path
+from src.ingestion.bronze_loader import read_source
+from tests.conftest import spark
+from src.ingestion.config import SourceConfig
+import pytest
 
+FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
 
-def main() -> None:
+def test_read_source_valid_csv(spark):
+    config = SourceConfig(
+        source_name= "ieso_test",
+        file_path= str(FIXTURE_DIR/ "ieso_valid.csv"),
+        target_table= "test_bronze"
+    )
+    df= read_source(spark,config)
+    assert df.count() == 3
+    assert df.columns == [
+        "Date",
+        "Hour",
+        "Market Demand",
+        "Ontario Demand"
+    ]
 
-    #create a local configuration
-    local_conf = replace(IESO_DEMAND_2025, file_path = str(CSV_FILE))
+def test_read_source_rejectes_reordered_headers(spark):
+    config = SourceConfig(
+        source_name= "ieso_test",
+        file_path= str(FIXTURE_DIR / "ieso_reordered.csv"),
+        target_table= "test_bronze"
 
-    #create a local spark session
-    spark = SparkSession.builder.getOrCreate()
+    )
+    with pytest.raises(Exception):
+        df = read_source(spark,config)
+        df.collect()
 
-    try:
-        #read the csv
-         df = read_source(spark,local_conf)
+def test_read_source_header_only_csv(spark):
+        config= SourceConfig(
+            source_name= "ieso_test",
+            file_path= str(FIXTURE_DIR / "ieso_header_only.csv"),
+            target_table= "test_bronze"
+        )
+        df = read_source(spark,config)
+        assert df.count() == 0
+        assert df.columns == [
+            "Date",
+            "Hour",
+            "Market Demand",
+            "Ontario Demand"
+        ]
 
-         #Inspect the data
-         df.printSchema()
-         df.show()
-         print(f"Total rows are:{df.count()}")
-         batch_id = str(uuid4())
-
-         print("displaying bronze dataframe")
-         df_bronze = prepare_bronze(df,local_conf,batch_id)
-         df_bronze.show()
-         print(f"number of rowa are {df_bronze.count()}")
-
-    finally:
-        spark.stop()
-
-if __name__ == "__main__":
-    main()
-   
+def test_read_source_bad_rows(spark):
+    config = SourceConfig(
+        source_name = "ieso_test",
+        file_path = str(FIXTURE_DIR / "ieso_bad_row.csv"),
+        target_table= "test_bronze"
+    )
+    assert (FIXTURE_DIR / "ieso_bad_row.csv").is_file()
+    with pytest.raises(Exception):
+        df = read_source(spark,config)
+        df.collect()
