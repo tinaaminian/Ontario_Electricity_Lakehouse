@@ -11,7 +11,7 @@ def validate_silver_demand(df:DataFrame) -> None:
     F.col("market_demand_mw").isNull()|
     F.col("ontario_demand_raw").isNull()|
     ~F.col("hour_ending").between(1,24)|
-    (F.col("market_demand_raw") <=0)|
+    (F.col("market_demand_mw") <=0)|
     (F.col("ontario_demand_raw") <=0)
 )
     invalid_count = invalide_rows.count()
