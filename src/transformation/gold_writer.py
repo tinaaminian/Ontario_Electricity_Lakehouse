@@ -1,7 +1,7 @@
 from pyspark.sql import DataFrame
 
 
-def write_gold_daily_demand(gold_df:DataFrame, taget_table:str) -> None:
+def write_gold_daily_demand(gold_df:DataFrame, target_table:str) -> None:
     """
         Persist validated gold faily demand data as a delta table.
         Strategy: full-refresh overwrite.
@@ -13,7 +13,7 @@ def write_gold_daily_demand(gold_df:DataFrame, taget_table:str) -> None:
         gold_df.write.format("delta")
         .mode("overwrite")
         .option("overwriteSchema", "true")
-        .saveAsTable("target_table")
+        .saveAsTable(target_table)
 
     )
     
