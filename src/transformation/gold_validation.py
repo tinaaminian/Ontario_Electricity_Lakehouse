@@ -13,7 +13,7 @@ def validate_daily_demand(gold_df:DataFrame) -> None:
         raise ValueError("Gold validation failed, dataframe is empty")
     
     # Validate no nulls
-    if gold_df.filter(F.col("demand_date").isNull().count() > 0):
+    if gold_df.filter(F.col("demand_date").isNull()).count() > 0:
             raise ValueError("gold validation failed: null dates")
     
 
